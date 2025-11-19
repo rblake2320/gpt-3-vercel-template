@@ -82,20 +82,48 @@
       const input = document.getElementById("input-field");
       const result = document.getElementById("result-field");
       const resultSection = document.querySelector(".result");
-      
+
       form.addEventListener("submit", submitForm);
 
       async function submitForm(event) {
         event.preventDefault();
-        const data = { input: input.value };
-        const response = await fetch('/api/request', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(data)
-          })
-        const text = await response.text();
-        result.textContent = text;
+        result.textContent = "";
         resultSection.style.display = "block";
+
+        const data = { input: input.value };
+
+        try {
+          const response = await fetch('/api/request', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+          });
+
+          if (!response.ok) {
+            result.textContent = `Error: ${response.status} ${response.statusText}`;
+            return;
+          }
+
+          if (!response.body) {
+            result.textContent = "Error: No response data received";
+            return;
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let done = false;
+
+          while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            if (value) {
+              const chunk = decoder.decode(value);
+              result.textContent += chunk;
+            }
+          }
+        } catch (error) {
+          result.textContent = `Error: ${error.message}`;
+        }
       }
     </script>
   </body>
