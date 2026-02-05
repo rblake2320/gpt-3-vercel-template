@@ -4,7 +4,6 @@ import {
   createParser,
   ParsedEvent,
   ReconnectInterval,
-  // @ts-ignore
 } from "eventsource-parser";
 import server from "../config-server";
 
@@ -25,6 +24,15 @@ export async function OpenAIStream(payload: object) {
     method: "POST",
     body: JSON.stringify(payload),
   });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`OpenAI API error (${res.status}): ${error}`);
+  }
+
+  if (!res.body) {
+    throw new Error("OpenAI API returned no response body");
+  }
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -53,8 +61,16 @@ export async function OpenAIStream(payload: object) {
       }
 
       const parser = createParser(onParse);
-      for await (const chunk of res.body as any) {
-        parser.feed(decoder.decode(chunk));
+
+      try {
+        const reader = res.body!.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          parser.feed(decoder.decode(value));
+        }
+      } catch (e) {
+        controller.error(e);
       }
     },
   });

@@ -1,60 +1,163 @@
+# GPT-3 Vercel Template
 
-Check this youtube video for the full tutorial and demo: https://www.youtube.com/watch?v=NGlfGRpkd0Q
+A modern Next.js template for building GPT-powered applications with streaming responses. Built with TypeScript, Tailwind CSS, and deployed on Vercel Edge Functions.
 
-## Get Started
+## Features
 
-1) Click use this template, and create a repository
-2) Setup a new project in vercel, and import this repo.
-3) Set up environment variables by copying the variables below and editing them.
-4) Deploy your application and give Vercel a moment to complete the deployment process.
-5) Visit your web app in your web browser, and share it to your friends. 🥳
-6) Paste in new custom widgets in the public directory as .html files.
-6) Use Project Atlas to generate new custom UI designs, and paste them into the public directory for instant deploys.🥳
+- **Streaming Responses**: Real-time streaming of GPT responses using Server-Sent Events
+- **Edge Runtime**: Optimized performance with Vercel Edge Functions
+- **TypeScript**: Full type safety throughout the application
+- **Tailwind CSS**: Modern, responsive UI with animated backgrounds
+- **Customizable**: Easy configuration through environment variables
+- **Error Handling**: Comprehensive error handling for production use
 
-## Setting up Environment Variables
+## Quick Start
 
-You can customize your application by using environment variables. Here are all available variables and the usages:
+### Prerequisites
 
-```env
-# Client side
+- Node.js 18.0.0 or higher
+- An OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
 
-# The app logo url.
-APP_LOGO=""
-# The name of the app.
-APP_NAME=""
-# Summary your app's behavoir and show the users how to use it.
-APP_SUMMARY=""
-# Example input that shows user how to use the app.
-EXAMPLE_INPUT=""
+### Local Development
 
-# Server side
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd gpt-3-vercel-template
+   ```
 
-# Required, the API key got from OpenAI (https://platform.openai.com/account/api-keys)
-OPENAI_API_KEY=""
-# Optional, the agent server of OpenAI API. Use this when the offical OpenAI API server is unreachable.
-OPENAI_API_BASE_URL=""
-# Optional, the system message helps set the behavior of the assistant. (Learn more from https://platform.openai.com/docs/guides/chat/introduction)
-SYSTEM_MESSAGE=""
-# Optional, the message template to wrap the user inputs, the `{{input}}` string in the template will be replaced by user inputs.
-MESSAGE_TEMPLATE=""
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and add your OpenAI API key:
+   ```env
+   OPENAI_API_KEY="your-api-key-here"
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/gpt-3-vercel-template)
+
+1. Click "Use this template" to create a new repository
+2. Import your repository in Vercel
+3. Configure environment variables (see below)
+4. Deploy!
+
+## Environment Variables
+
+Copy the `.env.example` file to `.env` and configure the following variables:
+
+### Client-side Variables
+These are exposed to the browser:
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `APP_NAME` | No | "OhMyGPT" | Your application name |
+| `APP_LOGO` | No | - | URL to your app logo |
+| `APP_THEME_COLOR` | No | "#22c55e" | Primary theme color (hex) |
+| `APP_SUMMARY` | No | "Ask me any thing you want." | App description |
+| `EXAMPLE_INPUT` | No | "Ask me any thing." | Placeholder text |
+
+### Server-side Variables
+These are only available on the server:
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPENAI_API_KEY` | **Yes** | - | Your OpenAI API key |
+| `OPENAI_API_BASE_URL` | No | "https://api.openai.com" | Custom API endpoint |
+| `SYSTEM_MESSAGE` | No | - | System prompt for GPT |
+| `MESSAGE_TEMPLATE` | No | - | Template for user messages (use `{{input}}` as placeholder) |
+
+## Project Structure
+
+```
+├── components/          # React components
+│   ├── background-gradient.tsx
+│   └── card.tsx
+├── helpers/            # Utility functions
+│   ├── env-utils.ts
+│   └── openai-stream.ts
+├── pages/              # Next.js pages
+│   ├── api/
+│   │   └── request.ts  # API endpoint for GPT requests
+│   ├── _app.tsx
+│   └── index.tsx       # Main page
+├── public/             # Static files
+├── styles/             # Global styles
+├── config-client.ts    # Client configuration
+├── config-server.ts    # Server configuration
+└── env.d.ts           # Environment types
 ```
 
-You can edit the example file located in the root directory of this project named `.env.example`. Once you have made the necessary changes, you can then copy and paste the entire content of the file into the "Environment Variables" input field on the Vercel console.
+## API Endpoints
 
+### POST /api/request
 
-### Generating custom widgets
-1) Use this phrase with Project Atlas in Cheat Layer to generate custom front end UIs: 
+Streams GPT responses for the given input.
 
+**Request Body:**
+```json
+{
+  "input": "Your question here"
+}
 ```
-generate a website with a professional looking form that contains 1 input. It submits an object {input: value} to /api/request. The result is available in the data variable as a text string. Print the result in a div. Do not use sendAjax and use fetch. Make it look fancy.
 
-```
-2) Create a new .html file in the /public directory, like test.html. Open the HTML file Cheat Layer downloads and copy/paste the HTML from that. 
-3) Click commit changes, and wait on vercel dashboard for the auto-deploy to test the new version!
+**Response:**
+Server-Sent Events stream of the GPT response
 
+**Error Codes:**
+- `400`: Invalid input (missing or empty)
+- `500`: Server error (API error, network issues, etc.)
 
-### Embedd the wiget
-1) Take the URL of the widget, and put it inside this code:
-```
-<iframe src="WIDGET_URL" width="100%"></iframe>
-```
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run type-check` - Run TypeScript type checking
+- `npm run lint` - Lint code with ESLint
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+
+### Code Quality
+
+This project uses:
+- **TypeScript 5.7+** for type safety
+- **ESLint** for code linting
+- **Prettier** for code formatting
+
+Run `npm run lint` and `npm run format` before committing.
+
+## Custom Widgets
+
+You can create custom HTML widgets in the `public/` directory:
+
+1. Create a new `.html` file (e.g., `public/custom.html`)
+2. Use the `/api/request` endpoint with streaming support
+3. Access it at `/custom.html`
+
+See `public/test.html` for an example implementation.
+
+## Tutorial
+
+Check out the [full tutorial and demo on YouTube](https://www.youtube.com/watch?v=NGlfGRpkd0Q)
+
+## License
+
+MIT
